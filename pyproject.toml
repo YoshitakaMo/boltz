@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "boltz"
 version = "0.4.1"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 description = "Boltz-1"
 readme = "README.md"
 dependencies = [
@@ -37,11 +37,19 @@ boltz = "boltz.main:cli"
 [project.optional-dependencies]
 lint = ["ruff"]
 test = ["pytest", "requests"]
+cpu = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
+]
+cu124 = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
+]
 
 [tool.ruff]
 src = ["src"]
 extend-exclude = ["conf.py"]
-target-version = "py39"
+target-version = "py312"
 lint.select = ["ALL"]
 lint.ignore = [
     "COM812",  # Conflicts with the formatter
@@ -84,3 +92,31 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "regression",
 ]
+
+[tool.uv]
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "cu124" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+  { index = "pytorch-cu124", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+  { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+  { index = "pytorch-cu124", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
